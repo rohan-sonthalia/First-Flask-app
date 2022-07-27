@@ -1,14 +1,15 @@
 from flask import Flask
 from flask_restful import Api, Resource, reqparse
+import json
 
 app = Flask(__name__)
 api = Api(app)
 
 parser = reqparse.RequestParser()
 
-parser.add_argument("name", type= str, help= "Name of the video")
-parser.add_argument("views", type= int, help= "Views of the video")
-parser.add_argument("likes", type= int, help= "Likes of the video")
+parser.add_argument("name", type= str, location="form", help= "Enter Name of the video")
+parser.add_argument("views", type= int, location="form", help= "Enter Views of the video")
+parser.add_argument("likes", type= int, location="form", help= "Enter Likes of the video")
 
 videos = {}
 
@@ -22,7 +23,7 @@ class Video(Resource):
 
     def put(self, video_id):
         args = parser.parse_args()
-        return {video_id: args}
+        return json.dumps({video_id: args})
 
 api.add_resource(Index, "/")
 api.add_resource(Video, "/video/<int:video_id>")
