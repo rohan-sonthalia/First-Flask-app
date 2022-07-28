@@ -1,5 +1,5 @@
 from flask import Flask
-from flask_restful import Api, Resource, reqparse
+from flask_restful import Api, Resource, reqparse, abort
 import json
 
 app = Flask(__name__)
@@ -13,17 +13,33 @@ parser.add_argument("likes", type= int, location="form", help= "Enter Likes of t
 
 videos = {}
 
+def no_exist(video_id):
+    if video_id not in videos:
+        abort(404, message = "Video does not exist.")
+
+def al_exists(video_id):
+    if video_id in videos:
+        abort(409, message = "Video already exists.")
+
 class Index(Resource):
     def get(self):
         return "Welcome to my API"
 
 class Video(Resource):
     def get(self, video_id):
+        no_exist(video_id)
         return videos[video_id]
 
     def put(self, video_id):
+        al_exists(video_id)
         args = parser.parse_args()
-        return json.dumps({video_id: args})
+        videos[video_id] = args
+        return json.dumps(videos[video_id])
+
+    def delete(self, video_id):
+        no_exist(video_id)
+        del videos[video_id]
+        return {"message": "Deleted successfully"}
 
 api.add_resource(Index, "/")
 api.add_resource(Video, "/video/<int:video_id>")
