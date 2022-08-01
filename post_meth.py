@@ -1,22 +1,31 @@
-from flask import Flask, request, url_for, redirect
+from flask import Flask, jsonify
 
-app = Flask("__name__")
+app = Flask(__name__)
+
+usersList = ['Aaron', 'Bianca', 'Cat', 'Danny', 'Elena']
 
 @app.route('/')
-def fault():
+def intro():
     return "Welcome to my API"
 
-@app.route('/success/<name>')
-def success(name):
-    return "Welcome %s" % name
+@app.route('/users', methods=['GET'])
+def users():
+    return jsonify({ 'users': [user for user in usersList] })
 
-@app.route('/login', methods=["POST", "GET"])
-def login():
-    if request.method == 'POST' :
-        username = request.form['username']
-        return redirect(url_for('success', name = username))
+@app.route('/users/<int:id>', methods=['GET'])
+def userById(id):
+    return jsonify({ 'username': usersList[id]  })
+
+@app.route('/users/<string:name>', methods=['GET'])
+def getUserByName(name):
+    if name in usersList:
+        return "User exists"
     else :
-        username = request.args.get('username')
-        return redirect(url_for('success', name = username))
+        return "User does not exist"
 
-app.run(host='0.0.0.0', port=81, debug=True)
+@app.route('/users/<string:name>', methods=['POST'])
+def addUserByName(name):
+    usersList.append(name)
+    return jsonify({ 'message': 'New user added'  })
+
+app.run(debug=True)
